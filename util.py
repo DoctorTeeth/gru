@@ -1,9 +1,12 @@
 import numpy as np
 
 def gradCheck(model, deltas, inputs, targets, epsilon, tolerance):
+
   diffs = getDiffs(model, deltas, inputs, targets, epsilon)
   answer = True
+
   for diffTensor, name, delta in zip(diffs, model.names, deltas):
+
     if np.abs(diffTensor.max()) >= tolerance:
       print "DIFF CHECK FAILS FOR TENSOR: ", name
       print "DIFF TENSOR: "
@@ -16,15 +19,17 @@ def gradCheck(model, deltas, inputs, targets, epsilon, tolerance):
       answer = False
     else:
       pass
+
   return answer
 
 def getDiffs(model, deltas, inputs, targets, epsilon):
   """
   For every (weight,delta) combo in zip(weights, deltas):
-    add epsilon to that weight and compute lossfunc, just take loss sum
-    remove epsilon from that weight and compute lossfunc, just take loss sum
-    check how close (first loss - second loss) / 2h is to the delta that was input
+    Add epsilon to that weight and compute the loss (first_loss)
+    Remove epsilon from that weight and compute the loss (second_loss)
+    Check how close (first loss - second loss) / 2h is to the delta from bprop
   """
+
   diff_tensors = []
   for D in deltas:
     diff_tensors.append(np.zeros_like(D))

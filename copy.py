@@ -6,7 +6,7 @@ from optimizers import Adagrad
 from util import gradCheck
 import sys
 
-# TODO: Uncomment to remove determinism
+# Uncomment to remove determinism
 np.random.seed(0)
 
 # Set to True to perform gradient checking
@@ -49,8 +49,7 @@ while True:
 
     # calculate the BPC
     print "bpc:"
-    # TODO: this is actually nats-per-char
-    # TODO: should we only count error where it's relevant?
+    # this is actually nats-per-char
     # if we count on the whole sequence it's unfair to 
     print np.sum(loss) / ((seq_length*2 + 2) * vec_size)
   
@@ -63,4 +62,4 @@ while True:
 
   optimizer.update_weights(model.weights, deltas)
 
-  n += 1 # iteration counter
+  n += 1 

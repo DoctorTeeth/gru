@@ -1,6 +1,6 @@
 """
-Generate random sequences for each of the different NTM tasks.
-Right now, only the copy task is implemented.
+Generate random instances of various artificial tasks.
+Right now, only a bit-vector copy task is implemented.
 """
 import numpy as np
 

@@ -1,6 +1,7 @@
 """
-Minimal character-level Vanilla RNN model. Written by Andrej Karpathy (@karpathy)
-BSD License
+Adapted from:
+  Minimal character-level Vanilla RNN model. Written by Andrej Karpathy (@karpathy)
+  BSD License
 """
 import numpy as np
 
@@ -8,7 +9,7 @@ class RNN(object):
 
   def __init__(self, in_size, out_size, hidden_size):
     
-    # the model parameters
+
     self.Wxh = np.random.randn(hidden_size, in_size)*0.01 # input to hidden
     self.Whh = np.random.randn(hidden_size, hidden_size)*0.01 # hidden to hidden
     self.Why = np.random.randn(out_size, hidden_size)*0.01 # hidden to output
@@ -17,8 +18,6 @@ class RNN(object):
 
     self.weights = [self.Wxh,self.Whh,self.Why,self.bh,self.by]
     self.names = ["Wxh","Whh","Why","bh","by"]
-
-    # the grads w.r.t the model parameters
 
   def lossFun(self, inputs, targets):
     """
@@ -32,15 +31,12 @@ class RNN(object):
     #xs are inputs
     #hs are hiddens
     #ys are outputs
-    #ps are the activation of last layer - probability
+    #ps are the activation of last layer
 
-    # so hs is actually a dict
-    # this affects computation of our first hidden state
     # we reset hidden state after every sequence
-    # TODO: maybe we don't need to 
     hs[-1] = np.zeros((self.Wxh.shape[0],1))
-    #print hs
     loss = 0
+
     # forward pass, compute outputs, t indexes time
     for t in xrange(len(inputs)):
       
@@ -74,50 +70,30 @@ class RNN(object):
     # no error is received from beyond the end of the sequence
     dhnext = np.zeros_like(hs[0])
 
-    # go backwards through time
+    # bprop to compute grads
     for t in reversed(xrange(len(inputs))):
 
-      # we have dC/dy_i = p_i - answer_i
-      # by the deriv of NLL wrt softmax
       dy = np.copy(ps[t])
       dy -= targets[t].T # backprop into y
 
-      # for weights from hidden to y
-      # y is sum of affine transform and a bias
-      # backprop shares grad between sum elements
-      # so grad wrt an individual weight w_hy
-      # when y = w_hy*h + ... + bias
-      # in this case, through the chain rule
-      # we come out to dy times the hidden unit 
-      # activation that the weight is associated with
       dWhy += np.dot(dy, hs[t].T)
 
-      # for y bias
-      # y is the sum of an affine transform and a bias
-      # in backprop, grads get copied over sums, so the grad
-      # wrt the whole affine transform is just dy, and so is the
-      # grad with respect to the bias
-      # so dC/dby = dC/dy dy/dby = dy
       dby += dy
 
-      #TODO: give a better explanation of this and below
+      # h[t] influences cost through y[t] and h[t+1]
       dh = np.dot(self.Why.T, dy) + dhnext # backprop into h
       h2 = np.multiply(hs[t], hs[t])
       dhraw = np.multiply((1 - h2) , dh) # backprop through tanh nonlinearity
       
-      # for the bias into the hidden layer
       dbh += dhraw
       
-      # for weights from input to hidden
       dWxh += np.dot(dhraw, xs[t].T)
 
-      # for weights from hidden to hidden
       dWhh += np.dot(dhraw, hs[t-1].T)
 
-      # TODO: what is this?
+      # contribution of h[t] to cost through h[t+1] 
       dhnext = np.dot(self.Whh.T, dhraw)
 
     deltas = [dWxh, dWhh, dWhy, dbh, dby]
 
     return loss, deltas, ps
-
